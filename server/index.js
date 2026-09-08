@@ -10,8 +10,8 @@ const port = process.env.PORT || 3001
 
 const vehicleOptions = {
   sedan: { name: 'Sedan', ratePerKm: 2.2, minimumFare: 42 },
-  suv: { name: 'SUV', ratePerKm: 2.7, minimumFare: 52 },
   maxi: { name: 'Maxi cab', ratePerKm: 3.4, minimumFare: 68 },
+  'station-wagon': { name: 'Station wagon', ratePerKm: 2.6, minimumFare: 50 },
 }
 
 const quotes = new Map()
@@ -47,6 +47,16 @@ function createDemoRoute(pickup, destination) {
   const distanceKm = Math.max(8, Math.min(48, 8 + (characters % 25)))
   const durationMinutes = Math.round(distanceKm * 2.15 + 8)
   return { distanceKm, durationMinutes }
+}
+
+async function geocodeAddress(address) {
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=au&q=${encodeURIComponent(address)}`, {
+    headers: { Accept: 'application/json', 'User-Agent': process.env.GEOCODING_USER_AGENT || 'HarbourRide/1.0' },
+  })
+  if (!response.ok) throw new Error('Address lookup unavailable')
+  const [result] = await response.json()
+  if (!result) throw new Error('Address not found')
+  return { label: result.display_name, lat: Number(result.lat), lng: Number(result.lon) }
 }
 
 async function createRoute(pickup, destination, pickupLocation, destinationLocation) {
@@ -90,7 +100,7 @@ app.get('/api/health', (request, response) => {
 })
 
 app.post('/api/estimate', async (request, response) => {
-  const { pickup, destination, pickupLocation, destinationLocation, vehicleId } = request.body
+  const { pickup, destination, vehicleId } = request.body
   if (!isNonEmptyString(pickup) || !isNonEmptyString(destination)) {
     return response.status(400).json({ message: 'Pickup and destination are required.' })
   }
@@ -98,7 +108,16 @@ app.post('/api/estimate', async (request, response) => {
     return response.status(400).json({ message: 'Choose a valid vehicle.' })
   }
 
-  const route = await createRoute(pickup, destination, pickupLocation, destinationLocation)
+  let verifiedPickupLocation
+  let verifiedDestinationLocation
+  try {
+    verifiedPickupLocation = await geocodeAddress(pickup)
+    verifiedDestinationLocation = await geocodeAddress(destination)
+  } catch (error) {
+    console.warn(`Using demo route because address verification failed: ${error.message}`)
+  }
+
+  const route = await createRoute(pickup, destination, verifiedPickupLocation, verifiedDestinationLocation)
   const quote = {
     id: randomUUID(),
     pickup: pickup.trim(),
@@ -132,6 +151,10 @@ app.post('/api/bookings', async (request, response) => {
   if (tripType === 'later' && Number.isNaN(Date.parse(pickupTime))) return response.status(400).json({ message: 'Enter a valid pickup time.' })
   if (tripType === 'later' && Date.parse(pickupTime) <= Date.now()) return response.status(400).json({ message: 'Scheduled pickup must be in the future.' })
 
+  if (typeof quoteId !== 'string' || !/^[0-9a-f-]{36}$/i.test(quoteId)) {
+    return response.status(400).json({ message: 'Your estimate reference is invalid. Please calculate it again.' })
+  }
+
   const quote = quotes.get(quoteId)
   if (!quote) return response.status(409).json({ message: 'Your estimate is no longer available. Please calculate it again.' })
   if (quote.expiresAt < Date.now()) {
@@ -147,15 +170,15 @@ app.post('/api/bookings', async (request, response) => {
   const booking = {
     reference: `HR-${Date.now().toString().slice(-6)}`,
     createdAt: new Date().toISOString(),
-    pickup,
-    destination,
+    pickup: quote.pickup,
+    destination: quote.destination,
     tripType,
     pickupTime: pickupTime || 'As soon as possible',
     passengerName,
     phone,
     email,
     notes: request.body.notes || '',
-    vehicle: vehicleOptions[vehicleId].name,
+    vehicle: vehicleOptions[quote.vehicleId].name,
     distanceKm: quote.distanceKm,
     durationMinutes: quote.durationMinutes,
     fare: quote.fare,

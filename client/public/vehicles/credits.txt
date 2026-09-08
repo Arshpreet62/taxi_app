@@ -1,0 +1,5 @@
+Vehicle images are Wikimedia Commons thumbnails used under their respective file licenses.
+
+Sedan: https://commons.wikimedia.org/wiki/File:2018_Toyota_Corolla_(ZRE172R)_Ascent_sedan_(2018-11-02)_02.jpg
+Maxi cab: https://commons.wikimedia.org/wiki/File:Volkswagen_Caddy_V_Maxi_1X7A6364.jpg
+Station wagon: https://commons.wikimedia.org/wiki/File:2023_Toyota_Corolla_Touring_Sports_Hybrid_(E210)_IMG_7679.jpg
