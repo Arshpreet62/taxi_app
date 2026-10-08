@@ -10,6 +10,8 @@ const UA = process.env.GEOCODER_USER_AGENT || 'HarbourRide/1.0 (github.com/Arshp
 
 // One retry on a network error: the public servers drop idle keep-alive sockets, and Node's fetch
 // can pick a dead one on the first request after a quiet spell. Timeouts are not retried.
+export const why = (e: unknown) => [(e as Error).message, ((e as Error).cause as Error)?.message].filter(Boolean).join(': ')
+
 async function get(url: string, timeoutMs: number) {
   const go = () => fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeout(timeoutMs) })
   try {
@@ -90,7 +92,7 @@ export async function route(a: Place, b: Place): Promise<Route> {
       geometry: r.geometry.coordinates,
     }
   } catch (e) {
-    console.warn(`Routing fell back to a straight line: ${(e as Error).message} ${((e as Error).cause as Error)?.message ?? ''}`)
+    console.warn(`Routing fell back to a straight line: ${why(e)}`)
     return straightLine(a, b)
   }
 }

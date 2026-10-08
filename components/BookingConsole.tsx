@@ -138,9 +138,10 @@ export function BookingConsole() {
         setTripError({ text: json.message || 'The fare could not be worked out.', call: json.code === 'outside' || json.code === 'far' })
         return null
       }
-      setEstimate(json)
+      const est: Estimate = { ...json, expiresAt: Date.now() + json.expiresIn }
+      setEstimate(est)
       setCountKey((k) => k + 1)
-      return json as Estimate
+      return est
     } catch {
       if (c.signal.aborted) return null
       setEstimate(null)

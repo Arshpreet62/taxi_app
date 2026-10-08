@@ -26,7 +26,8 @@ export async function POST(request: Request) {
     min: quote.min,
     approx: quote.approx,
     fares: quote.fares,
-    expiresAt: quote.exp,
+    // How long the lock lasts, not when it ends: the passenger's clock may not match ours.
+    expiresIn: quote.exp - Date.now(),
     geometry: r.geometry,
   })
 }

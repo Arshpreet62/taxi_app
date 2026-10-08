@@ -1,4 +1,4 @@
-import { reversePlace } from '@/lib/geo'
+import { reversePlace, why } from '@/lib/geo'
 import { inServiceArea } from '@/lib/places'
 
 // The address under a map tap, a dragged pin or "Use my location".
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const place = { label: found?.label ?? `${lat}, ${lng}`, area: found?.area, lat, lng }
     return Response.json({ place }, { headers: { 'Cache-Control': 'public, s-maxage=86400' } })
   } catch (e) {
-    console.warn(`Reverse lookup failed: ${(e as Error).message}`)
+    console.warn(`Reverse lookup failed: ${why(e)}`)
     return Response.json({ place: { label: 'Dropped pin', area: `${lat}, ${lng}`, lat, lng } })
   }
 }
