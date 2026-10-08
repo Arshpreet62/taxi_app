@@ -531,7 +531,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-2); opacity: 0.8; }
 /* ---- Map: MapLibre with the page's own colours ----------------------------- */
 .map { position: relative; margin: 0; height: clamp(16rem, 70vw, 30rem); background: var(--map-land); overflow: hidden; }
 @media (min-width: 1100px) { .map { flex: 1; height: auto; min-height: 32rem; margin-top: -5.5rem; } }
-.map__canvas { position: absolute; inset: 0; }
+.map__canvas, .map .maplibregl-map { position: absolute; inset: 0; }
 .map__loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink-2); font-weight: 600; font-size: var(--step--1); }
 .map .maplibregl-map { font: 500 0.75rem var(--f-sans); }
 .map .maplibregl-ctrl-group { background: var(--field); border: 1.5px solid var(--rule); box-shadow: none; }
@@ -555,13 +555,13 @@ input::placeholder, textarea::placeholder { color: var(--ink-2); opacity: 0.8; }
 .m-car__lamp { fill: var(--paper); stroke: var(--car-line); stroke-width: 2; }
 
 .map__cap {
-  position: absolute; left: var(--gutter); right: 4rem; bottom: 0.9rem; z-index: 2; pointer-events: none;
+  position: absolute; left: var(--gutter); right: 4rem; bottom: 2.4rem; z-index: 2; pointer-events: none;
   display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.2rem 1rem;
   font-size: 0.8125rem; font-weight: 600;
 }
 .map__cap span { background: var(--map-land); padding: 0 0.3rem; border-radius: 3px; }
 .map__hint { color: var(--ink-2); font-weight: 400; }
-@media (max-width: 1099px) { .map__cap { left: 0.6rem; right: 3.6rem; bottom: 0.6rem; font-size: 0.75rem; } .map__cap > span:first-child { display: none; } }
+@media (max-width: 1099px) { .map__cap { left: 0.6rem; right: 3.6rem; bottom: 2.2rem; font-size: 0.75rem; } .map__cap > span:first-child { display: none; } }
 
 /* ---- Meter extras: working out the fare, three-cell grid with the price lock ---- */
 .meter.is-busy .dg[data-d="-"] .g { animation: blink 0.9s ease-in-out infinite alternate; }

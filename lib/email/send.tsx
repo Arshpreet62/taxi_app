@@ -1,7 +1,7 @@
 import 'server-only'
-import { render, toPlainText } from '@react-email/components'
+import { render } from '@react-email/components'
 import { Resend } from 'resend'
-import { CustomerEmail, DispatchEmail, type Booking } from './templates'
+import { CustomerEmail, customerText, DispatchEmail, dispatchText, type Booking } from './templates'
 
 // Sends the dispatch email and the passenger's confirmation.
 // Without RESEND_API_KEY the emails are printed to the server log instead (local development).
@@ -36,7 +36,7 @@ export async function sendBooking(b: Booking, idempotencyKey: string, ics?: stri
     replyTo: b.email,
     subject: `New ride ${b.reference} · ${b.when} · ${b.car}`,
     html: dispatchHtml,
-    text: toPlainText(dispatchHtml),
+    text: dispatchText(b),
   }, `${idempotencyKey}-dispatch`)
   // Without dispatch there is no booking; don't confirm to the passenger.
   if (!dispatch.ok) return { dispatch, customer: { ok: false, error: 'skipped' } as Sent }
@@ -47,7 +47,7 @@ export async function sendBooking(b: Booking, idempotencyKey: string, ics?: stri
     replyTo: TO,
     subject: `Booked: ${b.reference}, ${b.when}`,
     html: customerHtml,
-    text: toPlainText(customerHtml),
+    text: customerText(b),
     attachments: ics ? [{ filename: `harbour-ride-${b.reference}.ics`, content: ics, contentType: 'text/calendar' }] : undefined,
   }, `${idempotencyKey}-customer`)
   return { dispatch, customer }

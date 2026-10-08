@@ -13,7 +13,8 @@ export async function GET(request: Request) {
     // Keep the exact spot the passenger chose; the name is only a label.
     const place = { label: found?.label ?? `${lat}, ${lng}`, area: found?.area, lat, lng }
     return Response.json({ place }, { headers: { 'Cache-Control': 'public, s-maxage=86400' } })
-  } catch {
+  } catch (e) {
+    console.warn(`Reverse lookup failed: ${(e as Error).message}`)
     return Response.json({ place: { label: 'Dropped pin', area: `${lat}, ${lng}`, lat, lng } })
   }
 }

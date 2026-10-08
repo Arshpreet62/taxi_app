@@ -119,3 +119,44 @@ export function CustomerEmail({ b }: { b: Booking }) {
     </Shell>
   )
 }
+
+// Plain-text versions, laid out like the docket, for clients that don't show HTML.
+function docketText(b: Booking, forDispatch: boolean) {
+  const rows: [string, string | undefined][] = [
+    ['Ref', b.reference],
+    ['When', b.when],
+    ['Pickup', b.pickup],
+    ['Drop-off', b.drop],
+    ['Car', `${b.car}, ${b.passengers} ${b.passengers === 1 ? 'passenger' : 'passengers'}`],
+    ['Estimate', `$${b.fare} (${b.approx ? 'about ' : ''}${b.km} km, ${b.min} min)`],
+    ['Flight', b.flight],
+    ...(forDispatch ? [['Passenger', b.name], ['Phone', b.phone], ['Email', b.email]] as [string, string][] : []),
+    ['Notes', b.notes || 'None'],
+  ]
+  return rows.filter(([, v]) => v).map(([k, v]) => `${k.padEnd(10)} ${v}`).join('\n')
+}
+
+export const dispatchText = (b: Booking) => [
+  `New ride ${b.reference}`,
+  `${b.scheduled ? 'Scheduled pickup.' : 'Pickup as soon as possible.'} Reply to this email to reach ${b.name}.`,
+  '',
+  docketText(b, true),
+  '',
+  `Pickup on the map: ${b.pickupMaps}`,
+  `Route: ${b.routeMaps}`,
+  ...(b.approx ? ['', 'Routing was down when this was quoted, so the distance is a straight-line estimate. Check the fare with the passenger.'] : []),
+  '',
+  `Booked online ${b.createdAt.toISOString()}`,
+].join('\n')
+
+export const customerText = (b: Booking) => [
+  `You're booked, ${b.name.split(' ')[0]}. Your reference is ${b.reference}.`,
+  b.scheduled ? 'A calendar entry is attached.' : 'A driver is on the way soon; they will call you if they can\u2019t find you.',
+  '',
+  docketText(b, false),
+  '',
+  'Pay the driver at the end, cash or card.',
+  `To change or cancel, call ${BUSINESS.phone} or reply to this email.`,
+  '',
+  "The fare is an estimate for the route shown; the driver's meter is final. We use your details only to run this ride.",
+].join('\n')

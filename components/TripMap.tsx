@@ -7,6 +7,8 @@ import { POPULAR, SERVICE_BBOX, SYDNEY, type Place } from '@/lib/places'
 
 // OpenFreeMap's Positron style (no key), recoloured from the page's own tokens so it matches day and night shift.
 const STYLE = process.env.NEXT_PUBLIC_MAP_STYLE || 'https://tiles.openfreemap.org/styles/positron'
+// Copied into public/ by scripts/copy-map-worker.mjs before dev and build.
+maplibregl.setWorkerUrl('/maplibre-gl-worker.mjs')
 
 type Props = {
   pickup: Place | null
@@ -134,6 +136,8 @@ export default function TripMap({ pickup, drop, geometry, approx, drawKey, locke
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
 
     map.on('load', () => {
+      // US road shields aren't used in Australia and their filters warn in the console.
+      for (const l of map.getStyle().layers) if (/shield/.test(l.id)) map.removeLayer(l.id)
       map.addSource('route', { type: 'geojson', data: line([]) })
       map.addSource('route-drawn', { type: 'geojson', data: line([]) })
       map.addSource('stops', {
