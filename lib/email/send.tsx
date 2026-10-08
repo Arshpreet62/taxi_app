@@ -26,6 +26,10 @@ async function deliver(mail: Mail, idempotencyKey: string): Promise<Sent> {
     },
     { idempotencyKey },
   )
+  // The key is a hash of the whole booking, so Resend refusing it as already used (or still sending)
+  // means this same booking went out already: a retry or a double tap. Each email carries the time
+  // it was written, so the repeat isn't byte-identical and Resend reports it this way.
+  if (error?.name === 'invalid_idempotent_request' || error?.name === 'concurrent_idempotent_requests') return { ok: true }
   return error ? { ok: false, error: `${error.name}: ${error.message}` } : { ok: true }
 }
 
