@@ -281,6 +281,8 @@ export function BookingConsole() {
     }
     setErrors({})
     setFormError(null)
+    // Start the countdown's clock now, or the first frame of step 2 counts down from 1970.
+    setNow(Date.now())
     setStep(2)
     say(`Price of $${money(est.fares[car])} locked for ${QUOTE_MINUTES} minutes.`)
   }
