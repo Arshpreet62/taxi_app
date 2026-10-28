@@ -400,7 +400,9 @@ export function BookingConsole() {
   return (
     <section className="console" id="book" aria-labelledby="title">
       <div className="console__head">
+        <p className="console__eyebrow">Sydney taxi bookings</p>
         <h1 id="title">See the fare before you&nbsp;ride.</h1>
+        <p className="console__lead">Choose your trip, compare cars, and lock the fare for 15 minutes before you confirm.</p>
       </div>
 
       <div className="sheet">
